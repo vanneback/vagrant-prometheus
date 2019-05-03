@@ -33,16 +33,10 @@ Vagrant.configure("2") do |config|
                 vbox.cpus = 2
             end
 
-            # Run ansible in parallel when all hosts are up and running
-            if host == hosts.keys.last
-                # ----------------------------------------------
-                # Install kubernetes on BOTH master and workers
-                # ----------------------------------------------
-                config.vm.provision "file", source: "./ca.crt", destination: "prometheus/ca.crt"
-                config.vm.provision "file", source: "./token", destination: "prometheus/token"
-                config.vm.provision "file", source: "./template.yaml", destination: "prometheus/template.yaml"
-                config.vm.provision "shell", path: "script.sh"
-            end
+            config.vm.provision "file", source: "./ca.crt", destination: "prometheus/ca.crt"
+            config.vm.provision "file", source: "./token", destination: "prometheus/token"
+            config.vm.provision "file", source: "./template.yaml", destination: "prometheus/template.yaml"
+            config.vm.provision "shell", path: "script.sh"
         end
     end
 

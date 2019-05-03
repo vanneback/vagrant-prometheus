@@ -1,0 +1,48 @@
+---
+- hosts: prometheus
+  become: yes
+  become_user: root
+  tasks:
+    - name: Create config directory for prometheus
+      file:
+        path: /etc/prometheus
+        state: directory
+
+    - name: download prometheus
+      get_url:
+        url: "https://github.com/prometheus/prometheus/releases/download/v{{ version }}/prometheus-{{ version }}.linux-amd64.tar.gz"
+        dest: /tmp/prometheus.tar.gz
+
+    - name: extract
+      unarchive:
+        src: /tmp/prometheus.tar.gz 
+        dest: /etc/prometheus
+        extra_opts: [--strip-components=1]
+        remote_src: yes
+        owner: "{{ ansible_user }}"
+
+    - name: render prometheus config
+      template:
+        src: prom-config.yaml.j2
+        dest: /etc/prometheus/config.yaml
+    
+    - name: Copy credentials
+      copy:
+        src: "{{ inventory_dir }}/ca.crt"
+        dest: /etc/prometheus/ca.crt
+        owner: "{{ ansible_user }}"
+        mode: 0644
+
+    - name: Copy token
+      copy:
+        src: "{{ inventory_dir }}/token"
+        dest: /etc/prometheus/token
+        owner: "{{ ansible_user }}"
+
+    - name: Copy alerts.yaml
+      copy:
+        src: "{{ inventory_dir }}/alerts.yaml"
+        dest: /etc/prometheus/alerts.yaml
+        owner: "{{ ansible_user }}"
+      when: alertmanager
+

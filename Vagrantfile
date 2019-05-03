@@ -32,11 +32,20 @@ Vagrant.configure("2") do |config|
                 vbox.customize ["modifyvm", :id, "--memory", hosts[host]["memory"]]
                 vbox.cpus = 2
             end
+            config.vm.provision :ansible do |ansible|
+                    # Run on all hosts in parallel
+                    ansible.limit = "all"
+                    ansible.playbook = "ansible/playbooks/provision-all.yml"
+                    ansible.inventory_path = "ansible/inventory.ini"
+            end
 
-            config.vm.provision "file", source: "./ca.crt", destination: "prometheus/ca.crt"
-            config.vm.provision "file", source: "./token", destination: "prometheus/token"
-            config.vm.provision "file", source: "./template.yaml", destination: "prometheus/template.yaml"
-            config.vm.provision "shell", path: "script.sh"
+           
+#            config.vm.provision "file", source: "./ca.crt", destination: "prometheus/ca.crt"
+#            config.vm.provision "file", source: "./token", destination: "prometheus/token"
+#            config.vm.provision "file", source: "./prom-template.yaml", destination: "prometheus/template.yaml"
+#            config.vm.provision "file", source: "./alerts.yaml", destination: "prometheus/alerts.yaml"
+#            config.vm.provision "file", source: "./alert-template.yaml", destination: "alertmanager/config.yaml"
+#            config.vm.provision "shell", path: "script.sh"
         end
     end
 

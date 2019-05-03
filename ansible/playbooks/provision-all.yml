@@ -1,0 +1,18 @@
+---
+- hosts: all
+  gather_facts: no
+  tasks:
+    - name: Install python if needed
+      become: yes
+      become_user: root
+      raw: test -e /usr/bin/python || yum install -y python2 || (apt -y update && apt install -y python-minimal)
+  tags:
+    - prereq
+- import_playbook: install-prometheus.yml
+  tags:
+    - prometheus
+
+- import_playbook: install-alertmanager.yml
+  when: alertmanager
+  tags:
+    - client

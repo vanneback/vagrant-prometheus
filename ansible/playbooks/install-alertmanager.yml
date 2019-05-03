@@ -1,0 +1,27 @@
+---
+- hosts: prometheus
+  become: yes
+  become_user: root
+  tasks:
+    - name: Create config directory for alertmanager
+      file:
+        path: /etc/alertmanager
+        state: directory
+
+    - name: download alertmanager
+      get_url:
+        url: "https://github.com/prometheus/alertmanager/releases/download/v{{ alert_version }}/alertmanager-{{ alert_version }}.linux-amd64.tar.gz"
+        dest: /tmp/alertmanager.tar.gz
+
+    - name: extract
+      unarchive:
+        src: /tmp/alertmanager.tar.gz 
+        dest: /etc/alertmanager
+        remote_src: yes
+        extra_opts: [--strip-components=1]
+        owner: "{{ ansible_user }}"
+
+    - name: copy alertmanager config
+      copy:
+        src: "{{ inventory_dir }}/alert-config.yaml"
+        dest: /etc/alertmanager/config.yaml
